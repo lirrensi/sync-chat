@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">bobr</string>
+    <string name="title_activity_main">bobr</string>
+    <string name="package_name">com.kurwa.bobr</string>
+    <string name="custom_url_scheme">com.kurwa.bobr</string>
+</resources>

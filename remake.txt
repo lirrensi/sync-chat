@@ -1,0 +1,195 @@
+well, a remake then...
+
+previous: manual sync
+local changed => to db local => state => send changes to all clients
+client => got even change => write to state => to db => state
+
+changes send fully encrypted, when sending an updates.
+
+Now, its different, as I can use gun db srtucutre as is and it would be synced.
+problem is, that now I have no way to encrypt data beforehand, as if I encrypt like all chats list - it would have been synced across all as a single blob and I cant really do that? so changes would not be merged at all
+
+as for example chats+messages, one delete a mess and other party writes and overwrites the entire blob?
+buuut. I would seem to have be compsomising the strucutre? of key data values?
+If using blobs, the are overwritten often...
+
+middle solution =>
+local database => push to gundb flat own encrypted blobs => other ends receives it => merges with own database => pushes changes to gun => other end receives it and merges all again.
+    => even easier => localGun => syncGUN => localGun
+    couch/gun => sharedGun => onChange => localGun - onchange delay 30sec...
+    each node submits is own blob, by machine_id;
+
+problem => duplicate in memory, as have to store both clear and encrypted data... and also potentially versions from each node
+well looks like my system is a bit better overall just need to optimize maybe.
+
+localdb => store loaded as needed, on live change - to local => send changes...
+
+so, overall, using GUN as database is probably out of question, as keys are stored plaintext and base structure is visible.
+Will be using Couch as full local state.
+But also still can use GUN for discovery of peers and the like... but do I need that, as another point of failure?
+Also need to specify absolutely all points and features I will be implementing, as...
+
+First:
+    Gun => machines for peers, which ones active so I only push on thats active only; Each reports to cental database to sync
+    userLoginAuth as usual, all strings encrypted with my own password;
+        machine_id => statusOnline, lastChange, lastOnline, statsDatabaseSize, revokedAccess(bool) 
+    Also gun can be used as message transport in terms of message queue => like each state pushes its changes fully encrypted, others get it and merge
+    So then => user account logged in => gundb created; machine_id => in there => live update status for online nodes;
+    => which then used to create connections on need;
+
+Also want to create a better view overall, like to have many multiple views; not just for chats but anything I might want, so I need to exit chat-only paradign and more into many other... => any software for productivity will go here;
+I will be a long testament of my proficiency in frontennd and the like;
+    => chats
+    notes as in simplenote, with support of lists
+    files cloud sync separate folder
+    calendaro... not sure?
+    notes movable as in desktop app I wanted...=> as simplenote?
+        as a list of notes, but different views: allow to be swipable or simply flat?
+    Outliner maybe as note... or note type?
+
+Then, a solid connection and syncing solution, over if now for one channel of webrtc;
+    So requests are establish and attempted to be reestablished quickly
+    Sending data => check current online => if not connection then create 
+        => send data in RQResponse to make sure they got it?
+        => just push and assume they got it?
+
+        => get active nodes online (filter own) => check have connection => create connections => push data...
+
+    How to ensure changes do propagate?
+        => when nodes online - looks easy, just send they all away to all nodes
+        => but the first was offline then come online => sending changes to all other nodes in bulk...
+        even incoming sync, make it staight away as buffer
+            => dump => compress => encrypt => send byteChunks? => replicate to local => load state...
+            => came online after less than one hr => replicate in parts, like send all chats, then all other docs... (files are local) also can msgpack + compress ( compress before)
+            yeas actually do this for all stuff, msgpack => pako => encrypt;
+
+Change state holding things so not everything is held at state at the same time, like only one chat
+Or only one unit of data really...
+while the actual full state if from the database;
+
+[] load chats and files only when actually navigated or page rendered; + unload on exit;
+
+
+[x] if not have account => redirect to settings page
+    [ ] setting page account create remake, to use gun and all that...
+    [x] userId smth special => SNX-uuid so will always be unique on the gun network; - store for now in app prefix;
+    [x] on close, disconnect, set last active as XXX;
+        [x] online status also checks if user was only last minute or considered offline;
+
+[ ] store decouple
+    [x] hold in memory only current chat with all messages => currently only one chat active...
+    [x] load things only on demand...
+SYNC
+    [x] remake databse syncing with sending all and replication
+    [x] make syncing when fist come online => attempt to send all peers
+        [x] what if peer like long dead? => we connect only to online and also last active in a minute;
+        but someone must be first... usually is coming online node?
+        two nodes are online, and syncing well
+        third node comes online after a day and must push its changes to other nodes and receive new updates, so therefore its a duty of a node coming online to replicate to other nodes?
+    [x] add proper conflic resolution also for chats definitions => last_update, for thing like archive and so on...
+        [x] extend this to messages
+    [x] add change message => for now text only
+    [x] add remove message => entirely, for now even one.. => as array, for many
+    [ ] add multiple message selection
+
+FILES
+    [x] think of file storage, how the hell it would work better...?
+        Central file works: store functions, refers to database, which may use multiple backends... not just files themselves...
+    [ ] Files regarding other options like file storage as in folders!;
+        [ ] Folders => flat structure, no entities like folders exactly, but path derived;
+        Therefore to have a folder must actually have at least one file in the folder...
+
+    [x] file downloaded state => query database if present; => look better
+    [x] remake file logic, so process callback related to file instant VS file thats loading some time...
+        [x] loading file => request each peer if they have it, fastest to answer => get from it => store database => update if present; with progress callback ofc;
+            [x] autoload small files when chats open OR when scrolled to better...
+    [ ] add indication that any peer has file in the render view, when file here not present... so I can know I can download
+        [ ] file errors when no-peer and no-file / other error...
+        [ ] later/file streaming => put into database, for both sides? as having to put into memory is somewhat whacky... or limir max file to like 100mb;
+
+NOTES?
+    Flat file structure or how? Do I do folders or just do the thingy with as is? I would more consider as is but maybe with tags
+    Note type: just text, WYSYwig editor maybe | TODO with checboxes flat | Outline basic;
+    [x] check how simplenote works
+    [x] but generally we follow the colornote example...
+
+[ ] SHARE OPTION UNIFIED
+    for chats? one message or any, for notes - full note, and file...
+    [x] notes
+    [ ] chats
+    [ ] files
+
+
+ENCRYPTION
+    must encrypt all above...
+    so sending only direct buffers, not even message events or contents
+    [x] remake sending and receiving handlers to always encrypt before and onGet => in peerconnection - for events
+    [x] remake peer requests to use like this => got data => send to request handler if any and exec callback;
+    [ ] res solution to encrypt the entire local database, but how will it work on mobile app and desktop, even TG does not have local file encrypt, and how will it even work with file storage, when need to share and decrypt...
+
+FIRSTLOGIN
+    smth not right as on import gun does not seem to work and I need to reload like two times...
+    [ ] database fixing script that will go over files in database for deleted messages and the like, to check junk;
+
+REMAKING removed and deleted;
+[ ?] making it note state? active 1, pinned to top 2 archived 3, removes/trash 4, deleted 5 (LOCKED NOW, truly deleted)
+[?] removed moved to special trash, while deleted as deleted: true, and all fields except modified_at nullified entirely.
+    same for files and notes;
+    while they are still up to sync, filter upon even query.
+    [ ] add for files and chats
+    [ ] when deleted - nullify it; (special type and the like) => add it right in the database handelers, special deleted type...
+    [???] how to handle deleted?
+        first option - nullify, but still keep in the state mem - do not filter them before the database, and keep online
+        second option - keep only in db, do not retrieve at all. BUT would need to remake all data sending so I send only from database only, as they still would need to be synced... => this looks a slighlty better? as saved a lot of trash from mems... and view should not be a basis of sync, it holds only part of view
+        [db => view => render] (update => db => view)
+
+[x] SYNC ADD conflict resolution for both files and notes! (as by time)
+    [x] deleted, add nullification build in database for sure.
+    [ ] sync sending data away fix => to retrieve all only from db and optional sending only selective data;
+        two stage synce - on connect => entirely; on events => only selective documents, and make it unified one event?
+
+[ ] app name, for first build optios
+    "bobr"
+
+[ ] better first import and starts, so I would not wonder why nothing worsk?
+    so it would restart and reload automatically on import...
+
+
+[ ] CALENDAR TAB
+    just a simple cal, but with many view options, basic is just monthly view exactly like in colornote
+    entities => diary (central day note), any note for the cal (as in color) with optional reminder, they are combined in two?
+
+===
+[?] multiple transport backends;
+event/message queue, so for example, pushed to some central state, where all can get messages and update from that, that would allow to use gun as backend; but well, questionable? no idea really;
+Ideally, would have on central peer discovery => gun/own server; and multiple transports;
+That would change how messages are send and received...like is even queue, many other developments would go again, as for example, each peer will have own internal state, time point after which I should get updates, and some public queue... which also be kept alive all times... need to think
+Ideally - to have alternative to webrtc for data transmission between;
+    Concerns
+        Two processes for data transfer -> onconnect sync where we send all possible data each over on when some peer connects to other one; And just online onchange events, which are short lived and onlyneeded for realitime sync;
+    Event modes: broadcast and request response (for initial sync and also for file/other critical things;)
+        For each transport would have to create specific event sending/handlers...
+Ideally => own protocol with own server, in addition to gun as peer connection status
+    and transport in ws, to send back and forth events, and RQ;
+
+libp2p may be promising, question is do I make it multiple transport backends or not...
+
+Central event bus => all events are living for like 5 min at most;
+Event => push
+All oher queess every 1 sec => loading new data from event news
+Each can delete outdates
+No rq,rs, as its all async like... but can emulate somtething like it above...
+    is async => send request, wait for desired entry to appear in shared queue...
+    problems =>
+        much slower, as events are not instant but at the time when we get query the queue...
+        gun specifically - serializing uints and the like;
+        file transfer will go to shit... but can manage with like bigger chunks or so.
+        all sync is on the hands of gun, but can have manual backends for that...
+        event queue still would be somewhat good, as we might simplify all redundant data sending, and instead sync only thats needed...
+ALT => switching entirely to libp2p and its services, see how that would wokr... but mess queue still looks good to implement, gives me better control maybe?
+current todo => libp2p test in all conditions, phone + local, so truly know all cases.//
+
+EventQueue => shared, just each client pushes changes into it;
+Each querries or even gets an event;
+all enc, but at timestamp:EncObject;
+so Can select by timestamp > localLastCheckTimestamp

@@ -1,0 +1,55 @@
+.color-selection-external {
+    display: flex;
+}
+.color-selection-external > div {
+    margin: 10px;
+
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    border: 0.5px solid lightgray;
+}
+
+.color-selected-block-display {
+    height: 48px;
+    margin-bottom: 16px;
+    text-align: center;
+    line-height: 48px;
+}
+
+.color-container {
+    margin: 15px 0px;
+}
+.color-selection-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.color-selection-container > div {
+    margin: 5px;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+}
+
+.color-active {
+    outline: 2px solid transparent;
+    outline-offset: -2px; /* Compensate for the added width */
+    box-shadow: 0 0 0 2px white, 0 0 5px 2px rgba(255, 255, 255, 0.5);
+}
+
+.quill {
+    /* min-height: 80vh; */
+    margin-top: 20px;
+}
+.ql-container.ql-snow {
+    /* border: 0.5px solid grey !important; */
+    /* border-radius: 10px; */
+    border: 0 !important;
+    /* background: #1b1b1b; */
+}
+.ql-editor {
+    font-size: 16px;
+    padding: 3px;
+    min-height: 80vh;
+}
