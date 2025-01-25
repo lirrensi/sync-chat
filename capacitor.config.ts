@@ -1,8 +1,8 @@
 import { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-    appId: "com.kurwa.bobr",
-    appName: "bobr",
+    appId: "com.syncchat.syncchat",
+    appName: "syncchat",
     webDir: "dist",
     server: {
         androidScheme: "https",

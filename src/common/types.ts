@@ -175,4 +175,15 @@ export interface DataMessageSharedEvent extends DataMessage {
 // event => create wrapper => apeend to db;
 // on === db change => for each not processed => process;
 // keep local version of saved events
-// request === wait for specific event... or how better
+// request === wait for specific event... or how better => request_id, response => for request id;
+
+// shared event log...
+// push => append just as event
+// clients try to sync current even queue and get process the events;
+
+
+// simpler...
+// client comes online
+// pushes to event log => sync_request + timestamp
+// each peeer reads and pushes own changes to the same object; own changes + last change ts?
+// ! cant do that, as I have blobs, race condition, both parties can attempt to write to the same at same time and nullify each other changes!
