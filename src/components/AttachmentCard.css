@@ -1,0 +1,65 @@
+.entry-attachment {
+    margin: 5px;
+    /* margin-right: 0px; */
+
+    background: #4300ff;
+    color: white;
+
+    height: auto;
+    /* width: 90%; */
+    border-radius: 10px;
+
+    display: flex;
+
+    /* justify-content: space-between; */
+    justify-content: flex-start;
+}
+.entry-attachment-row {
+    flex-direction: row;
+    height: 72px;
+}
+.entry-attachment-column {
+    flex-direction: column;
+}
+.entry-attachment-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 auto;
+}
+.entry-attachment-image ion-icon {
+    font-size: 36px;
+}
+.entry-attachment-row .entry-attachment-image {
+    border-radius: 10px 0 0 10px;
+    width: 72px;
+    height: auto;
+    margin-right: 5px;
+}
+.entry-attachment-column .entry-attachment-image {
+    border-radius: 10px 10px 0 0;
+    width: auto;
+    height: 128px;
+    margin-bottom: 5px;
+}
+.entry-attachment-detail {
+    padding: 5px;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.entry-attachment-row .entry-attachment-detail {
+    /* max-width: 60vw; */
+    height: 100%;
+}
+.entry-attachment-size {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.single-line-text {
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis (...) if text overflows */
+    white-space: nowrap; /* Prevent text from wrapping */
+}

@@ -1,0 +1,7 @@
+{
+    "name": "Syncchat",
+    "integrations": {
+        "capacitor": {}
+    },
+    "type": "react-vite"
+}
